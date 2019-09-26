@@ -13,6 +13,25 @@ pub fn run(webviews: &[WebView]) {
         let app = NSApp();
         app.setActivationPolicy_(NSApplicationActivationPolicyRegular);
 
+        // create Menu Bar
+        let menubar = NSMenu::new(nil).autorelease();
+        let app_menu_item = NSMenuItem::new(nil).autorelease();
+        menubar.addItem_(app_menu_item);
+        app.setMainMenu_(menubar);
+
+        // create Application menu
+        let app_menu = NSMenu::new(nil).autorelease();
+        let quit_prefix = NSString::alloc(nil).init_str("Quit ");
+        let quit_title =
+            quit_prefix.stringByAppendingString_(NSProcessInfo::processInfo(nil).processName());
+        let quit_action = selector("terminate:");
+        let quit_key = NSString::alloc(nil).init_str("q");
+        let quit_item = NSMenuItem::alloc(nil)
+            .initWithTitle_action_keyEquivalent_(quit_title, quit_action, quit_key)
+            .autorelease();
+        app_menu.addItem_(quit_item);
+        app_menu_item.setSubmenu_(app_menu);
+
         let _windows: Vec<_> = webviews
             .iter()
             .map(|webview| {
@@ -40,16 +59,13 @@ pub fn run(webviews: &[WebView]) {
                         NO,
                     )
                     .autorelease();
-                if let Some(title) = &webview.title {
+                window.canBecomeKeyWindow();
+                window.canBecomeMainWindow();
+                if let Some(ref title) = webview.title {
                     let title = NSString::alloc(nil).init_str(title);
                     window.setTitle_(title);
                 }
-                if webview.center {
-                    window.center();
-                }
-                if webview.focus {
-                    window.makeKeyAndOrderFront_(nil);
-                }
+                window.makeKeyAndOrderFront_(nil);
             })
             .collect();
 
@@ -67,9 +83,6 @@ pub struct WebView {
     height: f64,
     x: f64,
     y: f64,
-    // on open
-    center: bool,
-    focus: bool,
     // capacity
     closable: bool,
     miniaturizable: bool,
@@ -85,8 +98,6 @@ impl Default for WebView {
             height: 100.,
             x: 0.,
             y: 0.,
-            center: false,
-            focus: true,
             closable: true,
             miniaturizable: true,
             resizable: true,
@@ -132,16 +143,6 @@ impl WebViewBuilder {
 
     pub fn y(mut self, y: f64) -> Self {
         self.webview.y = y;
-        self
-    }
-
-    pub fn center(mut self, center: bool) -> Self {
-        self.webview.center = center;
-        self
-    }
-
-    pub fn focus(mut self, focus: bool) -> Self {
-        self.webview.focus = focus;
         self
     }
 

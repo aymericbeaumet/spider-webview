@@ -15,18 +15,9 @@ fn main() {
         .height(400.)
         .x(300.)
         .y(300.)
-        .closable(false)
         .miniaturizable(false)
         .resizable(false)
         .build();
 
-    let wv4 = webview::WebViewBuilder::new()
-        .title("I'm centered!")
-        .center(true)
-        .closable(false)
-        .miniaturizable(false)
-        .resizable(false)
-        .build();
-
-    webview::run(&[wv1, wv2, wv3, wv4]);
+    webview::run(&[wv1, wv2, wv3]);
 }
