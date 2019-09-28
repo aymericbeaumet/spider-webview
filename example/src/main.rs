@@ -21,6 +21,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let window =
         WindowBuilder::new().open(&DataURL("text/html;charset=US-ASCII", html).to_string())?;
 
+    window.run();
+
     // window.focus();
     // window.add_event_listener("message", |event| {
     //     println!("{}", event.data);

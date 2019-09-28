@@ -1,8 +1,8 @@
-#import <Foundation/Foundation.h>
-#import <WebKit/WebKit.h>
-
 #ifndef LIB_MACOS_WEBKIT_H_
 #define LIB_MACOS_WEBKIT_H_
+
+#import <Foundation/Foundation.h>
+#import <WebKit/WebKit.h>
 
 @interface MessageHandler : NSObject <WKScriptMessageHandler>
 

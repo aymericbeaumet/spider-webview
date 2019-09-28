@@ -15,13 +15,10 @@
 void window_open(const Window* self, const char* url) {
     [NSApplication sharedApplication];
 
-    NSUInteger windowStyle = NSWindowStyleMaskTitled;
-
-    NSRect windowRect = NSMakeRect(self->left, self->top, self->width, self->height);
-    NSWindow * window = [[NSWindow alloc] initWithContentRect:windowRect
-                                          styleMask:windowStyle
-                                          backing:NSBackingStoreBuffered
-                                          defer:NO];
+    NSWindow * window = [[NSWindow alloc] initWithContentRect:NSMakeRect(self->left, self->top, self->width, self->height)
+                                                    styleMask:NSWindowStyleMaskTitled
+                                                      backing:NSBackingStoreBuffered
+                                                        defer:NO];
     [window autorelease];
 
     WKUserContentController *userContentController = [[WKUserContentController alloc] init];
@@ -42,6 +39,8 @@ void window_open(const Window* self, const char* url) {
 
     [window.contentView addSubview:webView];
     [window orderFrontRegardless];
+}
 
+void run() {
     [NSApp run];
 }

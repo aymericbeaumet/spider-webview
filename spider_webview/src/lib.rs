@@ -68,6 +68,12 @@ impl Window {
     // pub fn close(&self) {
     //     bridge::unregister(self.id);
     // }
+
+    pub fn run(&self) {
+        unsafe {
+            bridge::run();
+        };
+    }
 }
 
 pub struct WindowBuilder {

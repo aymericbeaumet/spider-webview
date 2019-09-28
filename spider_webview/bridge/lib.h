@@ -11,5 +11,6 @@ typedef struct
 } Window;
 
 void window_open(const Window *self, const char *url);
+void run();
 
 #endif /* !LIB_H_ */
