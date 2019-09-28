@@ -3,25 +3,6 @@
 #import "lib.h"
 #import "lib-macos-webkit.h"
 
-@implementation MessageHandler
-
-- (id)initWithWindow:(const Window*)window withHandler:(handler_t)handler
-{
-    self = [super init];
-    if (self) {
-        self.window = window;
-        self.handler = handler;
-    }
-    return self;
-}
-
-- (void)userContentController:(WKUserContentController *)userContentController
-      didReceiveScriptMessage:(WKScriptMessage *)message {
-    self.handler(self.window);
-}
-
-@end
-
 void window_open(const Window* self, const char* url, handler_t handler) {
     [NSApplication sharedApplication];
 
@@ -34,7 +15,7 @@ void window_open(const Window* self, const char* url, handler_t handler) {
     WKUserContentController *userContentController = [[WKUserContentController alloc] init];
     [userContentController addScriptMessageHandler:[[MessageHandler alloc] initWithWindow:self withHandler:handler]
                                               name:@"spider_webview"];
-    [userContentController addUserScript:[[WKUserScript alloc] initWithSource:@"window.postMessage = window.webkit.messageHandlers.spider_webview.postMessage.bind(window.webkit.messageHandlers.spider_webview)"
+    [userContentController addUserScript:[[WKUserScript alloc] initWithSource:@"window.postMessage = (message, targetOrigin, transfer) => window.webkit.messageHandlers.spider_webview.postMessage(JSON.stringify(message), targetOrigin, transfer)"
                                                                 injectionTime:WKUserScriptInjectionTimeAtDocumentStart
                                                              forMainFrameOnly:YES]];
 
@@ -54,3 +35,23 @@ void window_open(const Window* self, const char* url, handler_t handler) {
 void run() {
     [NSApp run];
 }
+
+@implementation MessageHandler
+
+- (id)initWithWindow:(const Window*)window withHandler:(handler_t)handler
+{
+    self = [super init];
+    if (self) {
+        self.window = window;
+        self.handler = handler;
+    }
+    return self;
+}
+
+- (void)userContentController:(WKUserContentController *)userContentController
+      didReceiveScriptMessage:(WKScriptMessage *)message {
+    // we know message.body is a string (search for JSON.stringify in this file)
+    self.handler(self.window, [(NSString *)message.body UTF8String]);
+}
+
+@end

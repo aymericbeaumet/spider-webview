@@ -1,38 +1,9 @@
-// todo: warn when dataurl length >= 65000? (https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs#Common_problems)
-// todo: implement relevant Window properties/methods (https://developer.mozilla.org/en-US/docs/Web/API/Window)
-// - window.history.length;
-// - window.history.back();
-// - window.history.forward();
-// - window.history.go();
-// - window.history.pushState();
-// - window.history.replaceState();
-// - window.location = "https://google.com"
-// - window.full_screen
-// - window.screen_x
-// - window.screen_y
-// - window.alert();
-// - window.blur();
-// - window.close();
-// - window.confirm();
-// - window.find();
-// - window.focus();
-// - window.get_selection();
-// - window.minimize();
-// - window.move_by();
-// - window.move_to();
-// - window.post_message();
-// - window.prompt();
-// - window.resize_by();
-// - window.resize_to();
-// - window.scroll_by();
-// - window.scroll_to();
-// - window.scroll();
-// - window.stop();
+use std::ffi::{CStr, CString};
+use std::sync::atomic::{AtomicU32, Ordering};
 
 mod bridge;
 
-use std::ffi::CString;
-use std::sync::atomic::{AtomicU32, Ordering};
+static ID: AtomicU32 = AtomicU32::new(0);
 
 pub struct DataURL<'a>(pub &'a str, pub &'a str);
 
@@ -44,11 +15,12 @@ impl<'a> ToString for DataURL<'a> {
     }
 }
 
-static ID: AtomicU32 = AtomicU32::new(0);
-
-extern "C" fn handler(window: *const Window) {
+extern "C" fn handler(window: *const Window, message: *const i8) {
     let window = unsafe { *window };
-    window.handler();
+    let message = unsafe { CStr::from_ptr(message) }
+        .to_string_lossy()
+        .into_owned();
+    window.handler(&message);
 }
 
 pub type Window = bridge::Window;
@@ -66,22 +38,15 @@ impl Default for Window {
 }
 
 impl Window {
-    // pub fn post_message(&self, message: &str) {
-    //     bridge::post_message(self.id, message);
-    // }
-
-    // pub fn close(&self) {
-    //     bridge::unregister(self.id);
-    // }
-
     pub fn run(&self) {
         unsafe {
             bridge::run();
         };
     }
 
-    fn handler(&self) {
-        println!("window.handler!");
+    fn handler(&self, message: &str) {
+        let value: serde_json::Value = serde_json::from_str(message).unwrap();
+        println!("{:?}", value);
     }
 }
 

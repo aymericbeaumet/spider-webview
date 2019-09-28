@@ -4,11 +4,8 @@ const html: &str = r#"
     <html>
         <head>
             <script>
-                window.postMessage("test");
-                // window.addEventListener("message", (event) => {
-                //     document.write(event.data + '<br>');
-                //     event.source.postMessage(event.data)
-                // }, false);
+                window.addEventListener('DOMContentLoaded', () => window.postMessage({ event: 'DOMContentLoaded' }));
+                document.addEventListener('click', () => window.postMessage({ event: 'click' }));
             </script>
         </head>
         <body>

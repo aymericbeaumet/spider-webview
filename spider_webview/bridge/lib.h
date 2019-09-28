@@ -10,7 +10,7 @@ typedef struct
     double width;
 } Window;
 
-typedef void (*handler_t)(const Window *);
+typedef void (*handler_t)(const Window *, const char *);
 
 void window_open(const Window *self, const char *url, handler_t handler);
 void run();
