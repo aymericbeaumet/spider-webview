@@ -25,11 +25,11 @@ void window_open(const Window* self, const char* url) {
     [window autorelease];
 
     WKUserContentController *userContentController = [[WKUserContentController alloc] init];
-    [userContentController addUserScript:[[WKUserScript alloc] initWithSource:@"window.postMessage = window.webkit.messageHandlers.spider_webview.postMessage.bind(window.webkit.messageHandlers.spider_webview)"
-                 injectionTime:WKUserScriptInjectionTimeAtDocumentStart
-              forMainFrameOnly:YES]];
     [userContentController addScriptMessageHandler:[[MessageHandler alloc] init]
-                           name:@"spider_webview"];
+                                              name:@"spider_webview"];
+    [userContentController addUserScript:[[WKUserScript alloc] initWithSource:@"window.postMessage = window.webkit.messageHandlers.spider_webview.postMessage.bind(window.webkit.messageHandlers.spider_webview)"
+                                                                injectionTime:WKUserScriptInjectionTimeAtDocumentStart
+                                                             forMainFrameOnly:YES]];
 
     WKWebViewConfiguration *configuration = [[WKWebViewConfiguration alloc] init];
     configuration.userContentController = userContentController;
