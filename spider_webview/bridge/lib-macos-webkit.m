@@ -5,10 +5,11 @@
 
 @implementation MessageHandler
 
-- (id)initWithHandler:(handler_t)handler
+- (id)initWithWindow:(const Window*)window withHandler:(handler_t)handler
 {
     self = [super init];
     if (self) {
+        self.window = window;
         self.handler = handler;
     }
     return self;
@@ -16,7 +17,7 @@
 
 - (void)userContentController:(WKUserContentController *)userContentController
       didReceiveScriptMessage:(WKScriptMessage *)message {
-    self.handler();
+    self.handler(self.window);
 }
 
 @end
@@ -31,7 +32,7 @@ void window_open(const Window* self, const char* url, handler_t handler) {
     [window autorelease];
 
     WKUserContentController *userContentController = [[WKUserContentController alloc] init];
-    [userContentController addScriptMessageHandler:[[MessageHandler alloc] initWithHandler:handler]
+    [userContentController addScriptMessageHandler:[[MessageHandler alloc] initWithWindow:self withHandler:handler]
                                               name:@"spider_webview"];
     [userContentController addUserScript:[[WKUserScript alloc] initWithSource:@"window.postMessage = window.webkit.messageHandlers.spider_webview.postMessage.bind(window.webkit.messageHandlers.spider_webview)"
                                                                 injectionTime:WKUserScriptInjectionTimeAtDocumentStart

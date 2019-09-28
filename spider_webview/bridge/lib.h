@@ -1,8 +1,6 @@
 #ifndef LIB_H_
 #define LIB_H_
 
-typedef void (*handler_t)();
-
 typedef struct
 {
     unsigned int id;
@@ -11,6 +9,8 @@ typedef struct
     double height;
     double width;
 } Window;
+
+typedef void (*handler_t)(const Window *);
 
 void window_open(const Window *self, const char *url, handler_t handler);
 void run();

@@ -46,8 +46,9 @@ impl<'a> ToString for DataURL<'a> {
 
 static ID: AtomicU32 = AtomicU32::new(0);
 
-extern "C" fn handler() {
-    println!("message!");
+extern "C" fn handler(window: *const Window) {
+    let window = unsafe { *window };
+    window.handler();
 }
 
 pub type Window = bridge::Window;
@@ -77,6 +78,10 @@ impl Window {
         unsafe {
             bridge::run();
         };
+    }
+
+    fn handler(&self) {
+        println!("window.handler!");
     }
 }
 
