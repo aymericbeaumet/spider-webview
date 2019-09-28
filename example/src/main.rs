@@ -4,10 +4,11 @@ const html: &str = r#"
     <html>
         <head>
             <script>
-                window.addEventListener("message", (event) => {
-                    document.write(event.data + '<br>');
-                    event.source.postMessage(event.data)
-                }, false);
+                window.postMessage("test");
+                // window.addEventListener("message", (event) => {
+                //     document.write(event.data + '<br>');
+                //     event.source.postMessage(event.data)
+                // }, false);
             </script>
         </head>
         <body>

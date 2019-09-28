@@ -1,5 +1,4 @@
 // todo: warn when dataurl length >= 65000? (https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs#Common_problems)
-// todo: lazy inject the bridge JS code to emulate native communication during the first post_message
 // todo: implement relevant Window properties/methods (https://developer.mozilla.org/en-US/docs/Web/API/Window)
 // - window.history.length;
 // - window.history.back();
