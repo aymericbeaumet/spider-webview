@@ -1,10 +1,8 @@
 use std::ffi::{CStr, CString};
-use std::sync::atomic::{AtomicU32, Ordering};
 
 mod bridge;
 
-static ID: AtomicU32 = AtomicU32::new(0);
-
+/// Represents a DataURL.
 pub struct DataURL<'a>(pub &'a str, pub &'a str);
 
 impl<'a> ToString for DataURL<'a> {
@@ -15,20 +13,12 @@ impl<'a> ToString for DataURL<'a> {
     }
 }
 
-extern "C" fn handler(window: *const Window, message: *const i8) {
-    let window = unsafe { *window };
-    let message = unsafe { CStr::from_ptr(message) }
-        .to_string_lossy()
-        .into_owned();
-    window.handler(&message);
-}
-
+/// Represents a running window.
 pub type Window = bridge::Window;
 
 impl Default for Window {
     fn default() -> Self {
         Window {
-            id: 0,
             left: 200.,
             top: 400.,
             width: 500.,
@@ -50,6 +40,15 @@ impl Window {
     }
 }
 
+extern "C" fn window_handler(window: *const Window, message: *const i8) {
+    let window = unsafe { *window };
+    let message = unsafe { CStr::from_ptr(message) }
+        .to_string_lossy()
+        .into_owned();
+    window.handler(&message);
+}
+
+/// Allows to build a Window.
 pub struct WindowBuilder {
     window: Window,
 }
@@ -62,9 +61,12 @@ impl WindowBuilder {
     }
 
     pub fn open(mut self, url: &str) -> Result<Window, Box<dyn std::error::Error>> {
-        self.window.id = ID.fetch_add(1, Ordering::SeqCst);
         unsafe {
-            bridge::window_open(&self.window, CString::new(url)?.as_ptr(), Some(handler));
+            bridge::window_open(
+                &self.window,
+                CString::new(url)?.as_ptr(),
+                Some(window_handler),
+            );
         };
         Ok(self.window)
     }
@@ -90,5 +92,6 @@ impl WindowBuilder {
     }
 }
 
+/// Represents an error.
 #[derive(Debug)]
-pub struct WebViewError(String);
+pub struct WindowError(String);

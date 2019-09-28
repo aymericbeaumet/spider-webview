@@ -3,7 +3,6 @@
 
 typedef struct
 {
-    unsigned int id;
     double left;
     double top;
     double height;
