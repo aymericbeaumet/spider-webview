@@ -1,0 +1,13 @@
+[package]
+name = "spider_webview"
+version = "0.1.0"
+authors = ["Aymeric Beaumet <hi@aymericbeaumet.com>"]
+edition = "2018"
+build = "build.rs"
+
+[dependencies]
+base64 = "0.10.1"
+
+[build-dependencies]
+bindgen = "0.51.1"
+cc = { version = "1.0.45", features = ["parallel"] }

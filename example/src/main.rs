@@ -1,23 +1,39 @@
-fn main() {
-    let wv1 = webview::WebView::default();
+use spider_webview::{DataURL, WindowBuilder};
 
-    let wv2 = webview::WebViewBuilder::new()
-        .title_bar(false)
-        .width(200.)
-        .height(200.)
-        .x(100.)
-        .y(100.)
-        .build();
+const html: &str = r#"
+    <html>
+        <head>
+            <script>
+                window.addEventListener("message", (event) => {
+                    document.write(event.data + '<br>');
+                    event.source.postMessage(event.data)
+                }, false);
+            </script>
+        </head>
+        <body>
+            <h1>Hello world!</h1>
+        </body>
+    </html>
+"#;
 
-    let wv3 = webview::WebViewBuilder::new()
-        .title("At least a title!")
-        .width(400.)
-        .height(400.)
-        .x(300.)
-        .y(300.)
-        .miniaturizable(false)
-        .resizable(false)
-        .build();
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let window =
+        WindowBuilder::new().open(&DataURL("text/html;charset=US-ASCII", html).to_string())?;
 
-    webview::run(&[wv1, wv2, wv3]);
+    // window.focus();
+    // window.add_event_listener("message", |event| {
+    //     println!("{}", event.data);
+    // });
+
+    // 5..0.for_each(|i| {
+    //     window.post_message(&format!("leaving page in {}", i));
+    //     std::thread::sleep(std::time::Duration::from_secs(1));
+    // });
+
+    // window.location = "https://news.ycombinator.com";
+    // std::thread::sleep(std::time::Duration::from_secs(5));
+
+    // window.close()?;
+
+    Ok(())
 }

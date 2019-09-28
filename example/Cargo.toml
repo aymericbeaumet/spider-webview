@@ -5,4 +5,4 @@ authors = ["Aymeric Beaumet <hi@aymericbeaumet.com>"]
 edition = "2018"
 
 [dependencies]
-webview = { path = "../webview" }
+spider_webview = { path = "../spider_webview" }
