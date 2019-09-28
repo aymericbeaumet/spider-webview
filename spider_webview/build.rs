@@ -13,8 +13,7 @@ fn main() {
     println!("{:?}", bindings_file);
     // Compile the bridge library
     cc::Build::new()
-        .files(&["bridge/macos/lib.m"])
-        .include("bridge")
+        .files(&["bridge/lib-macos.m"])
         .compile("bridge");
     // Link the appropriate frameworks
     for framework in &["Cocoa", "WebKit"] {
