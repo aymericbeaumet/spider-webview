@@ -3,8 +3,13 @@
 
 #import <Foundation/Foundation.h>
 #import <WebKit/WebKit.h>
+#import "lib.h"
 
 @interface MessageHandler : NSObject <WKScriptMessageHandler>
+
+@property handler_t handler;
+
+- (id)initWithHandler:(handler_t)handler;
 
 - (void)userContentController:(WKUserContentController *)userContentController
       didReceiveScriptMessage:(WKScriptMessage *)message;

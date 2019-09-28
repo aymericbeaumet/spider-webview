@@ -46,6 +46,10 @@ impl<'a> ToString for DataURL<'a> {
 
 static ID: AtomicU32 = AtomicU32::new(0);
 
+extern "C" fn handler() {
+    println!("message!");
+}
+
 pub type Window = bridge::Window;
 
 impl Default for Window {
@@ -90,7 +94,7 @@ impl WindowBuilder {
     pub fn open(mut self, url: &str) -> Result<Window, Box<dyn std::error::Error>> {
         self.window.id = ID.fetch_add(1, Ordering::SeqCst);
         unsafe {
-            bridge::window_open(&self.window, CString::new(url)?.as_ptr());
+            bridge::window_open(&self.window, CString::new(url)?.as_ptr(), Some(handler));
         };
         Ok(self.window)
     }

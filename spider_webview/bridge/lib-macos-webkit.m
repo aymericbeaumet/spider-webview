@@ -5,14 +5,23 @@
 
 @implementation MessageHandler
 
+- (id)initWithHandler:(handler_t)handler
+{
+    self = [super init];
+    if (self) {
+        self.handler = handler;
+    }
+    return self;
+}
+
 - (void)userContentController:(WKUserContentController *)userContentController
       didReceiveScriptMessage:(WKScriptMessage *)message {
-    NSLog(@"Message received");
+    self.handler();
 }
 
 @end
 
-void window_open(const Window* self, const char* url) {
+void window_open(const Window* self, const char* url, handler_t handler) {
     [NSApplication sharedApplication];
 
     NSWindow * window = [[NSWindow alloc] initWithContentRect:NSMakeRect(self->left, self->top, self->width, self->height)
@@ -22,7 +31,7 @@ void window_open(const Window* self, const char* url) {
     [window autorelease];
 
     WKUserContentController *userContentController = [[WKUserContentController alloc] init];
-    [userContentController addScriptMessageHandler:[[MessageHandler alloc] init]
+    [userContentController addScriptMessageHandler:[[MessageHandler alloc] initWithHandler:handler]
                                               name:@"spider_webview"];
     [userContentController addUserScript:[[WKUserScript alloc] initWithSource:@"window.postMessage = window.webkit.messageHandlers.spider_webview.postMessage.bind(window.webkit.messageHandlers.spider_webview)"
                                                                 injectionTime:WKUserScriptInjectionTimeAtDocumentStart
