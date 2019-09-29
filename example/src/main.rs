@@ -1,24 +1,22 @@
 use spider_webview::{DataURL, Window};
 
-const HTML: &str = r#"
-    <html>
-        <head>
-            <script>
-                window.addEventListener('DOMContentLoaded', () => window.postMessage({ event: 'DOMContentLoaded' }));
-                document.addEventListener('click', () => window.postMessage({ event: 'click' }));
-            </script>
-        </head>
-        <body>
-            <h1>Hello world!</h1>
-        </body>
-    </html>
-"#;
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let url = DataURL("text/html;charset=US-ASCII", HTML).to_string();
-    let mut window = Window::new().top(200.).left(200.).open(&url)?;
-
-    // window.focus();
+    let mut window = Window::new()
+        .top(200.)
+        .left(200.)
+        .open(DataURL("text/html;charset=US-ASCII", r#"
+            <html>
+                <head>
+                    <script>
+                        window.addEventListener('DOMContentLoaded', () => window.postMessage({ event: 'DOMContentLoaded' }));
+                        document.addEventListener('click', () => window.postMessage({ event: 'click' }));
+                    </script>
+                </head>
+                <body>
+                    <h1>Hello world!</h1>
+                </body>
+            </html>
+        "#))?;
 
     window.add_event_listener("message", &|event| println!("{:?}", event.data));
 

@@ -9,6 +9,12 @@ mod bridge;
 /// See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
 pub struct DataURL<'a>(pub &'a str, pub &'a str);
 
+impl<'a> From<DataURL<'a>> for Vec<u8> {
+    fn from(data_url: DataURL<'a>) -> Self {
+        data_url.to_string().into()
+    }
+}
+
 impl<'a> ToString for DataURL<'a> {
     fn to_string(&self) -> String {
         let mediatype = self.0;
@@ -64,7 +70,10 @@ impl Window {
         self
     }
 
-    pub fn open(self, url: &str) -> Result<Box<OpenWindow>, Box<dyn std::error::Error>> {
+    pub fn open<'a, T: Into<Vec<u8>>>(
+        self,
+        url: T,
+    ) -> Result<Box<OpenWindow<'a>>, Box<dyn std::error::Error>> {
         let mut open_window = Box::new(OpenWindow::new(self));
         unsafe {
             bridge::window_open(
