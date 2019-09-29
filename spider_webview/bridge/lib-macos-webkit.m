@@ -3,6 +3,20 @@
 #import "lib.h"
 #import "lib-macos-webkit.h"
 
+void step() {
+    [NSApplication sharedApplication];
+    for (;;) {
+        NSEvent *event = [NSApp nextEventMatchingMask:NSEventMaskAny
+                                            untilDate:[NSDate distantPast]
+                                               inMode:NSDefaultRunLoopMode
+                                              dequeue:YES];
+        if (event == nil) {
+            break;
+        }
+        [NSApp sendEvent:event];
+    }
+}
+
 void window_open(const Window* self, const char* url, MessageHandlerCallback callback, void* context) {
     [NSApplication sharedApplication];
 
@@ -32,17 +46,8 @@ void window_open(const Window* self, const char* url, MessageHandlerCallback cal
     [window orderFrontRegardless];
 }
 
-void step() {
-    for (;;) {
-        NSEvent *event = [NSApp nextEventMatchingMask:NSEventMaskAny
-                                            untilDate:[NSDate distantPast]
-                                               inMode:NSDefaultRunLoopMode
-                                              dequeue:YES];
-        if (event == nil) {
-            break;
-        }
-        [NSApp sendEvent:event];
-    }
+void window_post_message(const Window *self, const char *message) {
+    NSLog(@"%@", @(message));
 }
 
 @implementation MessageHandler

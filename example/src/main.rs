@@ -1,4 +1,4 @@
-use spider_webview::{DataURL, Window};
+use spider_webview::{step, DataURL, Window};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut window = Window::new()
@@ -20,12 +20,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     window.add_event_listener("message", &|event| println!("{:?}", event.data));
 
-    window.run();
+    for i in (1..=5).rev() {
+        window.post_message(&format!("leaving page in {}", i))?;
+        std::thread::sleep(std::time::Duration::from_secs(1));
+    }
 
-    // 5..0.for_each(|i| {
-    //     window.post_message(&format!("leaving page in {}", i));
-    //     std::thread::sleep(std::time::Duration::from_secs(1));
-    // });
+    loop {
+        step();
+    }
 
     // window.location = "https://news.ycombinator.com";
     // std::thread::sleep(std::time::Duration::from_secs(5));

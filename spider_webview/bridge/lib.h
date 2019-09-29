@@ -11,8 +11,9 @@ typedef struct
 
 typedef void (*MessageHandlerCallback)(void *context, const char *data);
 
-void window_open(const Window *self, const char *url, MessageHandlerCallback callback, void *context);
-
 void step();
+
+void window_open(const Window *self, const char *url, MessageHandlerCallback callback, void *context);
+void window_post_message(const Window *self, const char *message);
 
 #endif /* !LIB_H_ */

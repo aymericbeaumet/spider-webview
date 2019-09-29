@@ -87,8 +87,7 @@ impl Window {
     }
 }
 
-/// OpenWindow wraps a window which has been open. Box allows to have a fixed
-/// address allocated on theap, enabling communication between rust and c.
+/// OpenWindow wraps a window which has been open.
 ///
 /// See: https://developer.mozilla.org/en-US/docs/Web/API/Window
 pub struct OpenWindow<'a> {
@@ -111,16 +110,9 @@ impl<'a> OpenWindow<'a> {
         entry.push(listener);
     }
 
-    pub fn step(&self) {
-        unsafe {
-            bridge::step();
-        };
-    }
-
-    pub fn run(&self) {
-        loop {
-            self.step();
-        }
+    pub fn post_message(&self, message: &str) -> Result<(), Box<dyn std::error::Error>> {
+        unsafe { bridge::window_post_message(&self.window, CString::new(message)?.as_ptr()) };
+        Ok(())
     }
 
     fn handle(&self, event_type: &str, data: &str) {
@@ -142,4 +134,10 @@ extern "C" fn open_window_handle_message_callback(
         .to_string_lossy()
         .into_owned();
     open_window.handle("message", &message);
+}
+
+pub fn step() {
+    unsafe {
+        bridge::step();
+    };
 }
