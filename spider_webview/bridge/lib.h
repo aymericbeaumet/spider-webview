@@ -9,9 +9,9 @@ typedef struct
     double width;
 } Window;
 
-typedef void (*handler_t)(const Window *, const char *);
+typedef void (*handler_t)(void *context, const char *data);
 
-void window_open(const Window *self, const char *url, handler_t handler);
+void window_open(const Window *self, const char *url, handler_t handler, void *context);
 void run();
 
 #endif /* !LIB_H_ */

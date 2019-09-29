@@ -7,10 +7,10 @@
 
 @interface MessageHandler : NSObject <WKScriptMessageHandler>
 
-@property const Window* window;
 @property handler_t handler;
+@property void* context;
 
-- (id)initWithWindow:(const Window*)window withHandler:(handler_t)handler;
+- (id)initWithHandler:(handler_t)handler withContext:(void*)context;
 
 - (void)userContentController:(WKUserContentController *)userContentController
       didReceiveScriptMessage:(WKScriptMessage *)message;

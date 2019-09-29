@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::ffi::{CStr, CString};
 
 mod bridge;
@@ -13,81 +14,104 @@ impl<'a> ToString for DataURL<'a> {
     }
 }
 
-/// Represents a running window.
-pub type Window = bridge::Window;
+/// Represents an event.
+pub struct Event {
+    pub data: serde_json::Value,
+}
 
-impl Default for Window {
+/// Represents a running window.
+pub struct OpenWindow<'a> {
+    bridge_window: bridge::Window,
+    listeners: HashMap<&'a str, Vec<Box<dyn Fn(&Event)>>>,
+}
+
+impl<'a> Default for OpenWindow<'a> {
     fn default() -> Self {
-        Window {
-            left: 200.,
-            top: 400.,
-            width: 500.,
-            height: 300.,
+        Self {
+            bridge_window: bridge::Window {
+                left: 200.,
+                top: 400.,
+                width: 500.,
+                height: 300.,
+            },
+            listeners: HashMap::new(),
         }
     }
 }
 
-impl Window {
+impl<'a> OpenWindow<'a> {
     pub fn run(&self) {
         unsafe {
             bridge::run();
         };
     }
 
-    fn handler(&self, message: &str) {
-        let value: serde_json::Value = serde_json::from_str(message).unwrap();
-        println!("{:?}", value);
+    pub fn add_event_listener(&mut self, event_type: &'a str, listener: Box<dyn Fn(&Event)>) {
+        let entry = self.listeners.entry(event_type).or_insert(vec![]);
+        entry.push(listener);
+    }
+
+    fn handler(&self, data: &str) {
+        if let Some(listeners) = self.listeners.get("message") {
+            let event = Event {
+                data: serde_json::from_str(data).unwrap(),
+            };
+            for listener in listeners {
+                listener(&event);
+            }
+        }
     }
 }
 
-extern "C" fn window_handler(window: *const Window, message: *const i8) {
-    let window = unsafe { *window };
+extern "C" fn window_handler(context: *mut std::ffi::c_void, message: *const i8) {
+    let open_window: &mut OpenWindow = unsafe { &mut *(context as *mut OpenWindow) };
     let message = unsafe { CStr::from_ptr(message) }
         .to_string_lossy()
         .into_owned();
-    window.handler(&message);
+    open_window.handler(&message);
 }
 
 /// Allows to build a Window.
-pub struct WindowBuilder {
-    window: Window,
+pub struct WindowConfiguration<'a> {
+    open_window: OpenWindow<'a>,
 }
 
-impl WindowBuilder {
+impl<'a> WindowConfiguration<'a> {
     pub fn new() -> Self {
-        WindowBuilder {
-            window: Window::default(),
+        Self {
+            open_window: OpenWindow::default(),
         }
     }
 
-    pub fn open(mut self, url: &str) -> Result<Window, Box<dyn std::error::Error>> {
+    pub fn open(&mut self, url: &str) -> Result<&'a mut OpenWindow, Box<dyn std::error::Error>> {
         unsafe {
             bridge::window_open(
-                &self.window,
+                &self.open_window.bridge_window,
                 CString::new(url)?.as_ptr(),
                 Some(window_handler),
+                &mut self.open_window as *mut _ as *mut std::ffi::c_void,
             );
         };
-        Ok(self.window)
+        Ok(&mut self.open_window)
     }
 
     pub fn left(mut self, left: f64) -> Self {
-        self.window.left = left;
+        self.open_window.bridge_window.left = left;
         self
     }
 
     pub fn top(mut self, top: f64) -> Self {
-        self.window.top = top;
+        self.open_window.bridge_window.top = top;
         self
     }
 
     pub fn width(mut self, width: f64) -> Self {
-        self.window.width = width;
+        self.open_window.bridge_window.width = width;
         self
     }
 
     pub fn height(mut self, height: f64) -> Self {
-        self.window.height = height;
+        self.open_window.bridge_window.height = height;
         self
     }
 }

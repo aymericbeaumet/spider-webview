@@ -1,6 +1,6 @@
-use spider_webview::{DataURL, WindowBuilder};
+use spider_webview::{DataURL, Event, WindowConfiguration};
 
-const html: &str = r#"
+const HTML: &str = r#"
     <html>
         <head>
             <script>
@@ -15,15 +15,16 @@ const html: &str = r#"
 "#;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let window =
-        WindowBuilder::new().open(&DataURL("text/html;charset=US-ASCII", html).to_string())?;
-
-    window.run();
+    let mut config = WindowConfiguration::new();
+    let window = config.open(&DataURL("text/html;charset=US-ASCII", HTML).to_string())?;
 
     // window.focus();
-    // window.add_event_listener("message", |event| {
-    //     println!("{}", event.data);
-    // });
+    window.add_event_listener(
+        "message",
+        Box::new(|event: &Event| println!("{}", event.data)),
+    );
+
+    window.run();
 
     // 5..0.for_each(|i| {
     //     window.post_message(&format!("leaving page in {}", i));
