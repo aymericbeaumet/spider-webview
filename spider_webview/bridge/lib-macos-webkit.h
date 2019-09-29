@@ -7,10 +7,10 @@
 
 @interface MessageHandler : NSObject <WKScriptMessageHandler>
 
-@property Handler handler;
+@property MessageHandlerCallback callback;
 @property void* context;
 
-- (id)initWithHandler:(Handler)handler withContext:(void*)context;
+- (id)initWithCallback:(MessageHandlerCallback)callback withContext:(void*)context;
 
 - (void)userContentController:(WKUserContentController *)userContentController
       didReceiveScriptMessage:(WKScriptMessage *)message;

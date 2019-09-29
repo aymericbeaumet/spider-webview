@@ -3,7 +3,7 @@
 #import "lib.h"
 #import "lib-macos-webkit.h"
 
-void window_open(const Window* self, const char* url, Handler handler, void* context) {
+void window_open(const Window* self, const char* url, MessageHandlerCallback callback, void* context) {
     [NSApplication sharedApplication];
 
     NSWindow * window = [[NSWindow alloc] initWithContentRect:NSMakeRect(self->left, self->top, self->width, self->height)
@@ -13,7 +13,7 @@ void window_open(const Window* self, const char* url, Handler handler, void* con
     [window autorelease];
 
     WKUserContentController *userContentController = [[WKUserContentController alloc] init];
-    [userContentController addScriptMessageHandler:[[MessageHandler alloc] initWithHandler:handler withContext:context]
+    [userContentController addScriptMessageHandler:[[MessageHandler alloc] initWithCallback:callback withContext:context]
                                               name:@"spider_webview"];
     [userContentController addUserScript:[[WKUserScript alloc] initWithSource:@"window.postMessage = (message, targetOrigin, transfer) => window.webkit.messageHandlers.spider_webview.postMessage(JSON.stringify(message), targetOrigin, transfer)"
                                                                 injectionTime:WKUserScriptInjectionTimeAtDocumentStart
@@ -47,11 +47,11 @@ void step() {
 
 @implementation MessageHandler
 
-- (id)initWithHandler:(Handler)handler withContext:(void*)context
+- (id)initWithCallback:(MessageHandlerCallback)callback withContext:(void*)context
 {
     self = [super init];
     if (self) {
-        self.handler = handler;
+        self.callback = callback;
         self.context = context;
     }
     return self;
@@ -60,7 +60,7 @@ void step() {
 - (void)userContentController:(WKUserContentController *) __unused userContentController
       didReceiveScriptMessage:(WKScriptMessage *)message {
     // we know message.body is a string (search for JSON.stringify in this file)
-    self.handler(self.context, [(NSString *)message.body UTF8String]);
+    self.callback(self.context, [(NSString *)message.body UTF8String]);
 }
 
 @end

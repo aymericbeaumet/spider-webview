@@ -1,4 +1,4 @@
-use spider_webview::{DataURL, Event, WindowConfiguration};
+use spider_webview::{DataURL, Window};
 
 const HTML: &str = r#"
     <html>
@@ -15,12 +15,12 @@ const HTML: &str = r#"
 "#;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut config = WindowConfiguration::new();
-    let window = config.open(&DataURL("text/html;charset=US-ASCII", HTML).to_string())?;
+    let url = DataURL("text/html;charset=US-ASCII", HTML).to_string();
+    let mut window = Window::new().top(200.).left(200.).open(&url)?;
 
     // window.focus();
 
-    window.add_event_listener("message", &|event: &Event| println!("{}", event.data));
+    window.add_event_listener("message", &|event| println!("{:?}", event.data));
 
     window.run();
 
