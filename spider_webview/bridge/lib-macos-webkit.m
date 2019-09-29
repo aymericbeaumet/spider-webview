@@ -34,7 +34,7 @@ void window_open(const Window* self, const char* url, handler_t handler, void* c
 
 void step() {
     for (;;) {
-        NSEvent *event = [NSApp nextEventMatchingMask:NSAnyEventMask
+        NSEvent *event = [NSApp nextEventMatchingMask:NSEventMaskAny
                                             untilDate:[NSDate distantPast]
                                                inMode:NSDefaultRunLoopMode
                                               dequeue:YES];
