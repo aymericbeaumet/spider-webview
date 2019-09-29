@@ -22,7 +22,7 @@ pub struct Event {
 /// Represents a running window.
 pub struct OpenWindow<'a> {
     bridge_window: bridge::Window,
-    listeners: HashMap<&'a str, Vec<Box<dyn Fn(&Event)>>>,
+    listeners: HashMap<&'a str, Vec<&'a dyn Fn(&Event)>>,
 }
 
 impl<'a> Default for OpenWindow<'a> {
@@ -46,7 +46,7 @@ impl<'a> OpenWindow<'a> {
         };
     }
 
-    pub fn add_event_listener(&mut self, event_type: &'a str, listener: Box<dyn Fn(&Event)>) {
+    pub fn add_event_listener(&mut self, event_type: &'a str, listener: &'a dyn Fn(&Event)) {
         let entry = self.listeners.entry(event_type).or_insert(vec![]);
         entry.push(listener);
     }

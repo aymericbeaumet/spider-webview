@@ -19,10 +19,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let window = config.open(&DataURL("text/html;charset=US-ASCII", HTML).to_string())?;
 
     // window.focus();
-    window.add_event_listener(
-        "message",
-        Box::new(|event: &Event| println!("{}", event.data)),
-    );
+
+    window.add_event_listener("message", &|event: &Event| println!("{}", event.data));
 
     window.run();
 
