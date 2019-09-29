@@ -40,15 +40,21 @@ impl<'a> Default for OpenWindow<'a> {
 }
 
 impl<'a> OpenWindow<'a> {
-    pub fn run(&self) {
-        unsafe {
-            bridge::run();
-        };
-    }
-
     pub fn add_event_listener(&mut self, event_type: &'a str, listener: &'a dyn Fn(&Event)) {
         let entry = self.listeners.entry(event_type).or_insert(vec![]);
         entry.push(listener);
+    }
+
+    pub fn step(&self) {
+        unsafe {
+            bridge::step();
+        };
+    }
+
+    pub fn run(&self) {
+        loop {
+            self.step();
+        }
     }
 
     fn handler(&self, data: &str) {

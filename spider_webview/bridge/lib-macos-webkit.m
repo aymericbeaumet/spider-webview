@@ -32,8 +32,17 @@ void window_open(const Window* self, const char* url, handler_t handler, void* c
     [window orderFrontRegardless];
 }
 
-void run() {
-    [NSApp run];
+void step() {
+    for (;;) {
+        NSEvent *event = [NSApp nextEventMatchingMask:NSAnyEventMask
+                                            untilDate:[NSDate distantPast]
+                                               inMode:NSDefaultRunLoopMode
+                                              dequeue:YES];
+        if (event == nil) {
+            break;
+        }
+        [NSApp sendEvent:event];
+    }
 }
 
 @implementation MessageHandler

@@ -12,6 +12,6 @@ typedef struct
 typedef void (*handler_t)(void *context, const char *data);
 
 void window_open(const Window *self, const char *url, handler_t handler, void *context);
-void run();
+void step();
 
 #endif /* !LIB_H_ */
