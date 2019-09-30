@@ -1,7 +1,27 @@
+#![feature(optin_builtin_traits)]
+
 use std::collections::HashMap;
 use std::ffi::{CStr, CString};
 
 mod bridge;
+
+/// WindowError is the error struct for this module.
+#[derive(Debug)]
+pub struct WindowError(String);
+
+impl WindowError {
+    fn new(message: &str) -> Self {
+        WindowError(message.to_owned())
+    }
+}
+
+impl std::fmt::Display for WindowError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl std::error::Error for WindowError {}
 
 /// DataURL stores a mediatype and data, it supports generating a string
 /// representation
@@ -75,15 +95,18 @@ impl Window {
         url: T,
     ) -> Result<Box<OpenWindow<'a>>, Box<dyn std::error::Error>> {
         let mut open_window = Box::new(OpenWindow::new(self));
-        unsafe {
+        match unsafe {
             bridge::window_open(
                 &(*open_window).window,
                 CString::new(url)?.as_ptr(),
                 Some(open_window_handle_message_callback),
                 &mut *open_window as *mut _ as *mut std::ffi::c_void,
-            );
-        };
-        Ok(open_window)
+            )
+        } {
+            0 => Ok(open_window),
+            -1 => Err(WindowError::new("windows can only be open from the main loop").into()),
+            _ => unreachable!("should never happen considering the expected codes"),
+        }
     }
 }
 
@@ -94,6 +117,9 @@ pub struct OpenWindow<'a> {
     window: Window,
     listeners: HashMap<&'a str, Vec<&'a dyn Fn(&Event)>>,
 }
+
+impl<'a> !Send for OpenWindow<'a> {}
+impl<'a> !Sync for OpenWindow<'a> {}
 
 impl<'a> OpenWindow<'a> {
     fn new(window: Window) -> Self {
@@ -128,16 +154,18 @@ impl<'a> OpenWindow<'a> {
 extern "C" fn open_window_handle_message_callback(
     context: *mut std::ffi::c_void,
     message: *const i8,
-) {
+) -> i32 {
     let open_window: &OpenWindow = unsafe { &*(context as *mut OpenWindow) };
     let message = unsafe { CStr::from_ptr(message) }
         .to_string_lossy()
         .into_owned();
     open_window.handle("message", &message);
+    0
 }
 
-pub fn step() {
-    unsafe {
-        bridge::step();
-    };
+pub fn step() -> Result<(), Box<dyn std::error::Error>> {
+    match unsafe { bridge::step() } {
+        0 => Ok(()),
+        _ => unreachable!("should never happen considering the expected codes"),
+    }
 }

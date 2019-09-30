@@ -20,14 +20,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     window.add_event_listener("message", &|event| println!("{:?}", event.data));
 
-    for i in (1..=5).rev() {
-        window.post_message(&format!("leaving page in {}", i))?;
-        std::thread::sleep(std::time::Duration::from_secs(1));
+    loop {
+        step()?;
     }
 
-    loop {
-        step();
-    }
+    // for i in (1..=5).rev() {
+    //     window.post_message(&format!("leaving page in {}", i))?;
+    //     std::thread::sleep(std::time::Duration::from_secs(1));
+    // }
 
     // window.location = "https://news.ycombinator.com";
     // std::thread::sleep(std::time::Duration::from_secs(5));

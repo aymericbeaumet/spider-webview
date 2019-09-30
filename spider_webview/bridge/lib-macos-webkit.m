@@ -1,10 +1,12 @@
+#import <pthread.h>
 #import <Cocoa/Cocoa.h>
 #import <WebKit/WebKit.h>
 #import "lib.h"
 #import "lib-macos-webkit.h"
 
-void step() {
+int step() {
     [NSApplication sharedApplication];
+
     for (;;) {
         NSEvent *event = [NSApp nextEventMatchingMask:NSEventMaskAny
                                             untilDate:[NSDate distantPast]
@@ -15,9 +17,15 @@ void step() {
         }
         [NSApp sendEvent:event];
     }
+
+    return 0;
 }
 
-void window_open(const Window* self, const char* url, MessageHandlerCallback callback, void* context) {
+int window_open(const Window* self, const char* url, MessageHandlerCallback callback, void* context) {
+    if (pthread_main_np() != 1) {
+        return -1;
+    }
+
     [NSApplication sharedApplication];
 
     NSWindow * window = [[NSWindow alloc] initWithContentRect:NSMakeRect(self->left, self->top, self->width, self->height)
@@ -44,10 +52,14 @@ void window_open(const Window* self, const char* url, MessageHandlerCallback cal
 
     [window.contentView addSubview:webView];
     [window orderFrontRegardless];
+
+    return 0;
 }
 
-void window_post_message(const Window *self, const char *message) {
+int window_post_message(const Window __unused *self, const char *message) {
     NSLog(@"%@", @(message));
+
+    return 0;
 }
 
 @implementation MessageHandler
@@ -65,7 +77,9 @@ void window_post_message(const Window *self, const char *message) {
 - (void)userContentController:(WKUserContentController *) __unused userContentController
       didReceiveScriptMessage:(WKScriptMessage *)message {
     // we know message.body is a string (search for JSON.stringify in this file)
-    self.callback(self.context, [(NSString *)message.body UTF8String]);
+    if (self.callback(self.context, [(NSString *)message.body UTF8String]) != 0) {
+        NSLog(@"error: the message callback failed to be invoked");
+    }
 }
 
 @end
